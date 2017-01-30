@@ -1,11 +1,11 @@
-var getDate = require('./date')
+var date = require('./date')
    ,uuid = require('node-uuid')
    ,fs = require('fs')
    ,request = require('request');
 
 function storeImg(src) {
   var imgName = uuid.v1().replace(/\-/g,'') + '.png';
-  var storeSrc = `images/${getDate}/${imgName}`;
+  var storeSrc = `images/${date}/${imgName}`;
   try {
     request(src)
       .pipe(fs.createWriteStream(storeSrc))

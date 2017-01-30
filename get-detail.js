@@ -1,13 +1,14 @@
 var http = require('http')
-  ,cheerio = require('cheerio')
-  ,iconv = require('iconv-lite')
-  ,color = require('colors')
-  ,storeImg = require('./storeImg');
+  , cheerio = require('cheerio')
+  , iconv = require('iconv-lite')
+  , color = require('colors')
+  , storeImg = require('./storeImg')
+  , NewsDetail = require('./module/newsDetail');
 
 // var url = 'http://news.163.com/17/0126/08/CBMOHKMF0001875P.html';
 // getDetailData('http://news.163.com/17/0126/08/CBMOHKMF0001875P.html')
 
-module.exports = function(url) {
+module.exports = function(url, id) {
   console.log(url.green);
 
   http.get(url, function (res) {
@@ -22,6 +23,9 @@ module.exports = function(url) {
       var chunkAll = Buffer.concat(bufArr, bufLen);
       var html = iconv.decode(chunkAll, 'gb2312');
       var $ = cheerio.load(html);
+      var title = $('#epContentLeft h1').text();
+      var dateTime = trim($('.post_time_source').text().replace('来源:', ''));
+      var from = $('#ne_article_source').text();
       var text = $('#endText p');
       var content = [];
       for (var  i = 0, j = text.length; i < j; i++) {
@@ -38,6 +42,23 @@ module.exports = function(url) {
           }
         }
       }
+      
+      var _newsDetail = NewsDetail({
+        id: id,
+        title: title,
+        time: dateTime,
+        from: from,
+        content: content
+      });
+
+      _newsDetail.save(function (err) {
+        if (err) {
+          console.log('详情存储失败'.red);
+        } else {
+          console.log('详情存储成功'.yellow)
+        }
+      });
+
       console.log(content);
       console.log('----------'.red);
     })
@@ -47,7 +68,7 @@ module.exports = function(url) {
 };
 
 function trim(testStr) {
-  var resultStr = testStr.replace(/[\t\t]/g, "").replace(/[\r\n]/g, "");
+  var resultStr = testStr.replace(/[\s\s]/g, "").replace(/[\t\n]/g, "");
   return resultStr;
 }
 

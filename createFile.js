@@ -1,8 +1,8 @@
-var getDate = require('./date')
+var date = require('./date')
    ,fs = require('fs');
 
 function createFile() {
-  var imgFile = `images/${getDate}`;
+  var imgFile = `images/${date}`;
   fs.exists(imgFile, function(exists) {
     if (exists) {
       console.log('存在');

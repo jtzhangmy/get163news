@@ -3,9 +3,11 @@ var http = require('http')
   ,iconv = require('iconv-lite')
   ,fs = require('fs')
   ,color = require('colors')
+  ,uuid = require('node-uuid')
   ,getDetailData = require('./get-detail')
   ,storeImg = require('./storeImg')
-  ,createFile = require('./createFile');
+  ,createFile = require('./createFile')
+  ,NewsList = require('./module/newsList');
 
 getListData('http://temp.163.com/special/00804KVA/cm_yaowen.js');
 
@@ -24,10 +26,52 @@ function getListData(url) {
       console.log(html);
       var num = 0;
       var dataLen = html.length;
+      // console.log(html);
       var timer = setInterval(function () {
         if(num < dataLen) {
-          var detailUrl = html[num].docurl;
-          getDetailData(detailUrl);
+          var content = html[num];
+          var title = content.title
+            , id = uuid.v4().replace(/\-/g,'')
+            , detailUrl = content.docurl
+            , time = content.time
+            , channelname = content.channelname
+            , image = content.imgurl
+            , keywords = content.keywords
+            , tag = [];
+
+          keywords.map(function (item) {
+            tag.push(item.keyname)
+          });
+
+
+
+          NewsList.findOne({title: title}, function (err, NewsListData) {
+            if (err) {
+              console.log('储存失败1'.red);
+            }
+            if (NewsListData == null) {
+              var _newsList = new NewsList({
+                id: id,
+                title: title,
+                keywords: tag,
+                time: time,
+                channelName: channelname,
+                image: storeImg(image)
+              });
+
+              _newsList.save(function (err, newsList) {
+                if(err) {
+                  console.log('储存失败2'.red);
+                } else {
+                  console.log('储存成功'.green);
+                }
+              })
+            } else {
+              console.log('已存在'.red);
+            }
+          });
+
+          getDetailData(detailUrl, id);
           console.log(num);
           num ++;
         } else {
@@ -41,7 +85,7 @@ function getListData(url) {
 };
 
 function trim(str) {
-  var resultStr = str.replace(/[ ]/g, "").replace(/\n/g, "").replace(/\r/g, "");
+  var resultStr = str.replace(/\s\s/g, "").replace(/\n/g, "").replace(/\r/g, "");
   return resultStr;
 }
 
