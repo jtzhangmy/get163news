@@ -4,9 +4,9 @@ var http = require('http')
   ,fs = require('fs')
   ,color = require('colors')
   ,uuid = require('node-uuid')
-  ,getDetailData = require('./get-detail')
-  ,storeImg = require('./storeImg')
-  ,createFile = require('./createFile')
+  ,getDetailData = require('./module/get-detail')
+  ,storeImg = require('./module/storeImg')
+  ,createFile = require('./module/createFile')
   ,NewsList = require('./module/newsList');
 
 getListData('http://temp.163.com/special/00804KVA/cm_yaowen.js');
